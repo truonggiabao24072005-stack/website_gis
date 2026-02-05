@@ -103,12 +103,12 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "vi"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Ho_Chi_Minh"
 
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
 
 
@@ -116,3 +116,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Cấu hình lưu trữ file media (ảnh, video...)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# --- CẤU HÌNH GIAO DIỆN JAZZMIN ---
+JAZZMIN_SETTINGS = {
+    # Tiêu đề trang
+    "site_title": "Quản lý Căn hộ",
+    "site_header": "Hệ thống GIS",
+    "site_brand": "Admin Bất Động Sản",
+    "site_logo": None,
+    
+    # Thông điệp chào mừng
+    "welcome_sign": "Chào mừng quay trở lại!",
+    "copyright": "My Company Ltd",
+    
+    # Menu bên trái 
+    "search_model": "myapp.Apartment", 
+    
+    # Cấu hình icon cho các bảng
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "myapp.Apartment": "fas fa-building",
+    },
