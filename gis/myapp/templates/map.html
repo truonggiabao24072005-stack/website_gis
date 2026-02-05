@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %} Bản đồ Căn hộ TP.HCM {% endblock %}
+
+{% block content_wrapper %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+    <style>
+        .user-pulse-icon {
+            background-color: #4285F4; width: 18px; height: 18px;
+            border-radius: 50%; border: 3px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3); position: relative; z-index: 2;
+        }
+        .user-pulse-icon::after {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); width: 100%; height: 100%;
+            border-radius: 50%; background-color: rgba(66, 133, 244, 0.6);
+            animation: pulse-ring 2s infinite; z-index: -1;
+        }
+        @keyframes pulse-ring {
+            0% { width: 100%; height: 100%; opacity: 0.8; }
+            100% { width: 400%; height: 400%; opacity: 0; }
+        }
+        .distance-tooltip {
+            background-color: #fff; border: 2px solid #dc3545; color: #dc3545;
+            font-weight: bold; padding: 4px 10px; border-radius: 20px;
+        }
+        .leaflet-tooltip-left:before, .leaflet-tooltip-right:before { border: none !important; }
+        .leaflet-interactive { cursor: pointer; }
+        
+        .info-floating-box {
+            background: white; padding: 10px 15px; border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2); text-align: center;
+            border-left: 5px solid #4285F4; min-width: 120px;
+        }
+        .info-dist { font-size: 20px; font-weight: bold; color: #d93025; }
+    </style>
+
+    <div class="main-container">
+        <div class="sidebar-panel">
+            <div style="padding: 15px; border-bottom: 1px solid #eee;">
+                <h4 class="mb-0 text-primary"><i class="fas fa-map-marked-alt"></i> Thuê Nhà Sài Gòn</h4>
+                <small id="status-msg" class="text-warning">
+                    <i class="fas fa-spinner fa-spin"></i> Đang tìm vị trí...
+                </small>
+            </div>
+
+            <div id="listing-panel" class="scrollable-content">
+                {% for item in apartments %}
+                <div class="apt-card" id="card-{{ item.id }}" 
+                     onclick="focusApartment({{ item.lat|stringformat:'f' }}, {{ item.lng|stringformat:'f' }}, {{ item.id }})">
+                    {% if item.image %}
+                        <img src="{{ item.image }}" class="apt-img" alt="House">
+                    {% else %}
+                        <img src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267" class="apt-img" alt="House">
+                    {% endif %}
+                    <div class="apt-details">
+                        <div class="d-flex justify-content-between">
+                            <span class="apt-price">{{ item.price }}₫ <small>/đêm</small></span>
+                            <span class="badge badge-success">Còn phòng</span>
+                        </div>
+                        <h5 class="apt-name">{{ item.name }}</h5>
+                        <p class="apt-address"><i class="fas fa-map-marker-alt"></i> {{ item.address }}</p>
+                        <div class="apt-actions">
+                            <button class="btn btn-outline-primary btn-sm flex-grow-1" 
+                                onclick="event.stopPropagation(); prepareRoute({{ item.lat|stringformat:'f' }}, {{ item.lng|stringformat:'f' }}, '{{ item.name }}')">
+                                <i class="fas fa-route"></i> Chỉ đường
+                            </button>
+                            <a href="{% url 'apartment_detail' item.id %}" class="btn btn-primary btn-sm ml-2">
+                                <i class="fas fa-info-circle"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="direction-panel" style="display:none; flex-direction: column; padding: 15px; height: 100%;">
+                <button class="back-btn" onclick="closeDirectionPanel()">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </button>
+                <h5 class="mb-1 mt-2">Đến: <span id="dest-title" class="text-primary">...</span></h5>
+                <div class="transport-options mb-3">
+                    <button class="t-btn active" onclick="changeMode('driving')">🚗 Ô tô</button>
+                    <button class="t-btn" onclick="changeMode('cycling')">🛵 Xe máy</button>
+                    <button class="t-btn" onclick="changeMode('walking')">🚶 Đi bộ</button>
+                </div>
+                <div id="loading-box" class="text-center py-3" style="display:none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p>Đang tìm đường...</p>
+                </div>
+                <div id="error-box" class="alert alert-danger" style="display:none"></div>
+                <div id="routes-list" class="list-group overflow-auto" style="flex: 1;"></div>
+            </div>
+        </div>
+
+        <div class="map-wrapper"><div id="map"></div></div>
+    </div>
+        <script>
+        const DEFAULT_LAT = 10.7721; const DEFAULT_LNG = 106.6983;
+        var map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OpenStreetMap' }).addTo(map);
+
+        var userLocation = null; var userMarker = null;
+        var currentDest = null; var currentMode = 'driving';
+        var apartments = {{ apartments|safe }};
+        var currentRouteLayers = []; var distanceLabels = []; var infoControl = null; var routesData = [];
+
+        var blueIcon = new L.Icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+        });
+
+        apartments.forEach(apt => {
+            L.marker([apt.lat, apt.lng], {icon: blueIcon}).addTo(map)
+             .bindPopup(`<b>${apt.name}</b><br><button class="btn btn-sm btn-primary mt-1" onclick="prepareRoute(${apt.lat}, ${apt.lng}, '${apt.name}')">Chỉ đường</button>`);
+        });
