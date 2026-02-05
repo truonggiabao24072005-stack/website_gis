@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %} Trang chủ - Hệ thống Căn hộ Nghỉ dưỡng {% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Tìm Căn Hộ Nghỉ Dưỡng Trong Mơ</h1>
+        <p class="hero-subtitle">Khám phá hàng ngàn địa điểm tuyệt vời với bản đồ trực quan.</p>
+        <a href="{% url 'map_view' %}" class="btn btn-primary btn-hero shadow">
+            <i class="fas fa-map-marked-alt"></i> Xem Bản Đồ & Tìm Phòng Ngay
+        </a>
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="font-weight-bold text-dark">Tại sao chọn chúng tôi?</h2>
+            <p class="text-muted">Trải nghiệm đặt phòng dễ dàng và tin cậy nhất</p>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-search-location feature-icon"></i>
+                    <h4>Tìm kiếm Trực quan</h4>
+                    <p class="text-muted">Xem vị trí chính xác, tiện ích xung quanh trên bản đồ số.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-route feature-icon"></i>
+                    <h4>Dẫn đường Thông minh</h4>
+                    <p class="text-muted">Tính khoảng cách và thời gian di chuyển từ vị trí của bạn.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <h4>An toàn & Minh bạch</h4>
+                    <p class="text-muted">Thông tin giá cả, hình ảnh thực tế được xác thực rõ ràng.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-primary text-white text-center py-5">
+    <div class="container">
+        <h2 class="mb-3">Bạn đã sẵn sàng cho kỳ nghỉ chưa?</h2>
+        <a href="{% url 'map_view' %}" class="btn btn-light btn-lg font-weight-bold shadow">Đặt phòng ngay</a>
+    </div>
+</div>
+{% endblock %}
