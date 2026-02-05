@@ -116,3 +116,50 @@
             L.marker([apt.lat, apt.lng], {icon: blueIcon}).addTo(map)
              .bindPopup(`<b>${apt.name}</b><br><button class="btn btn-sm btn-primary mt-1" onclick="prepareRoute(${apt.lat}, ${apt.lng}, '${apt.name}')">Chỉ đường</button>`);
         });
+
+        
+        // 1. XỬ LÝ VỊ TRÍ NGƯỜI DÙNG
+        function onLocationFound(lat, lng, isFake) {
+            userLocation = { lat: lat, lng: lng };
+            if(userMarker) map.removeLayer(userMarker);
+            
+            var pulseIcon = L.divIcon({
+                className: 'custom-div-icon', 
+                html: "<div class='user-pulse-icon'></div>", iconSize: [18, 18], iconAnchor: [9, 9]
+            });
+            userMarker = L.marker([lat, lng], {icon: pulseIcon}).addTo(map)
+                .bindPopup(isFake ? "<b>Vị trí giả định</b>" : "<b>Bạn đang ở đây</b>");
+
+            document.getElementById('status-msg').innerHTML = isFake ? 
+                '<i class="fas fa-exclamation-triangle"></i> GPS giả định' : '<i class="fas fa-check-circle"></i> Đã tìm thấy bạn';
+
+            // --- TỰ ĐỘNG CHỈ ĐƯỜNG NẾU CÓ YÊU CẦU ---
+            if (currentDest) {
+                console.log("Đã có vị trí + Đích đến -> Gọi API ngay!");
+                callPythonAPI();
+            } else {
+                checkUrlForAutoRoute();
+            }
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => onLocationFound(pos.coords.latitude, pos.coords.longitude, false), 
+                (err) => onLocationFound(DEFAULT_LAT, DEFAULT_LNG, true)
+            );
+        } else { onLocationFound(DEFAULT_LAT, DEFAULT_LNG, true); }
+
+        // 2. CHUẨN BỊ CHỈ ĐƯỜNG
+        function prepareRoute(lat, lng, name) {
+            currentDest = { lat: lat, lng: lng, name: name };
+            document.getElementById('listing-panel').style.display = 'none';
+            document.getElementById('direction-panel').style.display = 'flex';
+            document.getElementById('dest-title').innerText = name;
+            
+            // Nếu đã có vị trí người dùng thì gọi API luôn
+            if (userLocation) {
+                callPythonAPI();
+            }
+        }
+
+
