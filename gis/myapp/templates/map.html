@@ -143,7 +143,7 @@
         <button class="t-btn active" onclick="changeMode('driving')">
           🚗 Ô tô
         </button>
-        <button class="t-btn" onclick="changeMode('cycling')">🛵 Xe máy</button>
+        <button class="t-btn" onclick="changeMode('cycling')">🚲 Xe máy</button>
         <button class="t-btn" onclick="changeMode('walking')">🚶 Đi bộ</button>
       </div>
       <div id="loading-box" class="text-center py-3" style="display: none">
@@ -165,6 +165,7 @@
 
   <div class="map-wrapper"><div id="map"></div></div>
 </div>
+
 <script>
   const DEFAULT_LAT = 10.7721; const DEFAULT_LNG = 106.6983;
   var map = L.map('map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
@@ -185,7 +186,48 @@
       L.marker([apt.lat, apt.lng], {icon: blueIcon}).addTo(map)
        .bindPopup(`<b>${apt.name}</b><br><button class="btn btn-sm btn-primary mt-1" onclick="prepareRoute(${apt.lat}, ${apt.lng}, '${apt.name}')">Chỉ đường</button>`);
   });
-  // 3. GỌI API PYTHON
+
+
+      function onLocationFound(lat, lng, isFake) {
+      userLocation = { lat: lat, lng: lng };
+      if(userMarker) map.removeLayer(userMarker);
+
+      var pulseIcon = L.divIcon({
+          className: 'custom-div-icon',
+          html: "<div class='user-pulse-icon'></div>", iconSize: [18, 18], iconAnchor: [9, 9]
+      });
+      userMarker = L.marker([lat, lng], {icon: pulseIcon}).addTo(map)
+          .bindPopup(isFake ? "<b>Vị trí giả định</b>" : "<b>Bạn đang ở đây</b>");
+
+      document.getElementById('status-msg').innerHTML = isFake ?
+          '<i class="fas fa-exclamation-triangle"></i> GPS giả định' : '<i class="fas fa-check-circle"></i> Đã tìm thấy bạn';
+
+
+      if (currentDest) {
+          console.log("Đã có vị trí + Đích đến -> Gọi API ngay!");
+          callPythonAPI();
+      } else {
+          checkUrlForAutoRoute();
+      }
+  }
+
+  if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+          (pos) => onLocationFound(pos.coords.latitude, pos.coords.longitude, false),
+          (err) => onLocationFound(DEFAULT_LAT, DEFAULT_LNG, true)
+      );
+  } else { onLocationFound(DEFAULT_LAT, DEFAULT_LNG, true); }
+
+  function prepareRoute(lat, lng, name) {
+      currentDest = { lat: lat, lng: lng, name: name };
+      document.getElementById('listing-panel').style.display = 'none';
+      document.getElementById('direction-panel').style.display = 'flex';
+      document.getElementById('dest-title').innerText = name;
+
+      if (userLocation) {
+          callPythonAPI();
+      }
+  }
   function callPythonAPI() {
       if (!userLocation || !currentDest) return;
       document.getElementById('loading-box').style.display = 'block';
@@ -263,7 +305,7 @@
       });
   }
 
-  // 4. KIỂM TRA URL (target_id)
+
   function checkUrlForAutoRoute() {
       const urlParams = new URLSearchParams(window.location.search);
       const targetId = urlParams.get('target_id');
@@ -289,7 +331,7 @@
 
   function focusApartment(lat, lng, id) { map.flyTo([lat, lng], 15); }
 
-  // Chạy kiểm tra ngay khi load
+
   checkUrlForAutoRoute();
 </script>
 {% endblock %}
