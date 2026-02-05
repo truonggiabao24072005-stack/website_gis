@@ -147,3 +147,48 @@ JAZZMIN_SETTINGS = {
         "auth.Group": "fas fa-users",
         "myapp.Apartment": "fas fa-building",
     },
+         # Giao diện
+    "topmenu_links": [
+        {"name": "Trang chủ",  "url": "home", "permissions": ["auth.view_user"]},
+        {"name": "Xem Bản đồ", "url": "map_view", "new_window": True}, # Link nhanh ra bản đồ
+    ],
+    
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["myapp", "auth"], # Sắp xếp app nào hiện trước
+    "custom_css": None,
+    "custom_js": None,
+    "use_google_fonts_cdn": True,
+    "show_ui_builder": True, # Cho phép hiện nút chỉnh màu (Góc trên bên phải)
+}
+
+# Tùy chỉnh màu sắc giao diện
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-primary",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark navbar-primary",
+    "no_navbar_border": False,
+    "navbar_fixed": False,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "theme": "flatly", # Các theme đẹp: flatly, dark, slate, simplex...
+    "dark_mode_theme": None,
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+    
