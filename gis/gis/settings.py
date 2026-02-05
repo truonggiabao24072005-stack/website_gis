@@ -147,7 +147,7 @@ JAZZMIN_SETTINGS = {
         "auth.Group": "fas fa-users",
         "myapp.Apartment": "fas fa-building",
     },
-        # Giao diện
+         # Giao diện
     "topmenu_links": [
         {"name": "Trang chủ",  "url": "home", "permissions": ["auth.view_user"]},
         {"name": "Xem Bản đồ", "url": "map_view", "new_window": True}, # Link nhanh ra bản đồ
