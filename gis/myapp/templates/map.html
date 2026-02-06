@@ -174,15 +174,41 @@
   var apartments = {{ apartments|safe }};
   var currentRouteLayers = []; var distanceLabels = []; var infoControl = null; var routesData = [];
 
-  var blueIcon = new L.Icon({
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-      iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34]
+  var hotelIcon = L.divIcon({
+      className: 'custom-hotel-icon',
+      html: `<div style="background-color: #4285F4; width: 36px; height: 36px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 18px;">
+              <i class="fas fa-bed"></i> 
+              </div>`,
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -36] 
   });
 
   apartments.forEach(apt => {
-      L.marker([apt.lat, apt.lng], {icon: blueIcon}).addTo(map)
-       .bindPopup(`<b>${apt.name}</b><br><button class="btn btn-sm btn-primary mt-1" onclick="prepareRoute(${apt.lat}, ${apt.lng}, '${apt.name}')">Chỉ đường</button>`);
+      var marker = L.marker([apt.lat, apt.lng], {icon: hotelIcon}).addTo(map);
+      var popupContent = `
+          <div style="min-width: 200px; overflow: hidden; border-radius: 8px;">
+              <div style="height: 120px; overflow: hidden;">
+                  <img src="${apt.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'}" 
+                        alt="${apt.name}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+
+              <div class="p-2 text-center">
+                  <h6 class="font-weight-bold mb-1 text-primary text-truncate" title="${apt.name}">${apt.name}</h6>
+                  <p class="mb-2 text-danger font-weight-bold" style="font-size:14px;">${apt.price} VNĐ <small class="text-muted">/đêm</small></p>
+                  
+                  <div class="d-flex justify-content-between">
+                      <button class="btn btn-sm btn-outline-primary flex-grow-1 mr-1" onclick="prepareRoute(${apt.lat}, ${apt.lng}, '${apt.name}')">
+                          <i class="fas fa-route"></i> Đi
+                      </button>
+                      <a href="/apartment/${apt.id}/" class="btn btn-sm btn-primary text-white flex-grow-1">
+                          <i class="fas fa-info-circle"></i> Xem
+                      </a>
+                  </div>
+              </div>
+          </div>
+      `;
+      marker.bindPopup(popupContent, {maxWidth: 220, minWidth: 200, closeButton: false});
   });
 
 

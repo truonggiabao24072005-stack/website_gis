@@ -12,5 +12,5 @@ class Apartment(models.Model):
     def __str__(self):
         return self.name
     class Meta:
-        verbose_name = "Căn hộ"            # Tên số ít (khi sửa 1 cái)
-        verbose_name_plural = "Danh sách Căn hộ" # Tên số nhiều (hiện ở menu)
+        verbose_name = "Căn hộ"
+        verbose_name_plural = "Danh sách Căn hộ"
